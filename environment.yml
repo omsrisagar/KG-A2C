@@ -1,0 +1,13 @@
+name: vln
+channels:
+  - defaults
+  - pip:
+    - fuzzywuzzy
+    - jericho
+    - networkx
+    - redis
+    - sentencepiece
+    - tensorboardx
+    - tensorflow
+    - torch
+    - torchvision
