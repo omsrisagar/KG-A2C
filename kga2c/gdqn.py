@@ -22,7 +22,7 @@ from vec_env import *
 import logger
 
 
-device = torch.device("cuda")
+# device = torch.device("cuda")
 
 
 def configure_logger(log_dir):
@@ -46,7 +46,9 @@ class KGA2CTrainer(object):
         configure_logger(params['output_dir'])
         log('Parameters {}'.format(params))
         self.params = params
-        self.binding = load_bindings(params['rom_file_path'])
+        env = FrotzEnv(params['rom_file_path'])
+        # self.binding = jericho._load_bindings(params['rom_file_path']) # load_bindings no longer works
+        self.binding = env.bindings
         self.max_word_length = self.binding['max_word_length']
         self.sp = spm.SentencePieceProcessor()
         self.sp.Load(params['spm_file'])
@@ -55,10 +57,9 @@ class KGA2CTrainer(object):
                           stuck_steps=params['stuck_steps'], gat=params['gat'])
         self.vec_env = VecEnv(params['batch_size'], kg_env, params['openie_path'])
         self.template_generator = TemplateActionGenerator(self.binding)
-        env = FrotzEnv(params['rom_file_path'])
         self.vocab_act, self.vocab_act_rev = load_vocab(env)
         self.model = KGA2C(params, self.template_generator.templates, self.max_word_length,
-                           self.vocab_act, self.vocab_act_rev, len(self.sp), gat=self.params['gat']).cuda()
+                           self.vocab_act, self.vocab_act_rev, len(self.sp), gat=self.params['gat'])
         self.batch_size = params['batch_size']
         if params['preload_weights']:
             self.model = torch.load(self.params['preload_weights'])['model']
@@ -88,7 +89,7 @@ class KGA2CTrainer(object):
                 obj_t.update(a.obj_ids)
             tmpl_target.append(cur_t)
             obj_targets.append(list(obj_t))
-        tmpl_target_tt = torch.FloatTensor(tmpl_target).cuda()
+        tmpl_target_tt = torch.FloatTensor(tmpl_target)
 
         # Note: Adjusted to use the objects in the admissible actions only
         object_mask_target = []
@@ -97,7 +98,7 @@ class KGA2CTrainer(object):
             for o in objl:
                 cur_objt[o] = 1
             object_mask_target.append([[cur_objt], [cur_objt]])
-        obj_target_tt = torch.FloatTensor(object_mask_target).squeeze().cuda()
+        obj_target_tt = torch.FloatTensor(object_mask_target).squeeze()
         return tmpl_target_tt, obj_target_tt
 
 
@@ -130,7 +131,7 @@ class KGA2CTrainer(object):
             else:
                 assert False, 'Unrecognized masking {}'.format(self.params['masking'])
             mask_all.append(mask)
-        return torch.BoolTensor(mask_all).cuda().detach()
+        return torch.BoolTensor(mask_all)
 
 
     def discount_reward(self, transitions, last_values):
@@ -192,8 +193,8 @@ class KGA2CTrainer(object):
             for done, info in zip(dones, infos):
                 if done:
                     tb.logkv_mean('EpisodeScore', info['score'])
-            rew_tt = torch.FloatTensor(rewards).cuda().unsqueeze(1)
-            done_mask_tt = (~torch.tensor(dones)).float().cuda().unsqueeze(1)
+            rew_tt = torch.FloatTensor(rewards).unsqueeze(1)
+            done_mask_tt = (~torch.tensor(dones)).float().unsqueeze(1)
             self.model.reset_hidden(done_mask_tt)
             transitions.append((tmpl_pred_tt, obj_pred_tt, value, rew_tt,
                                 done_mask_tt, tmpl_gt_tt, dec_tmpl_tt,
@@ -246,11 +247,11 @@ class KGA2CTrainer(object):
                     o2_mask[d] = 1
                 elif st == 1:
                     o1_mask[d] = 1
-            o1_mask = torch.FloatTensor(o1_mask).cuda()
-            o2_mask = torch.FloatTensor(o2_mask).cuda()
+            o1_mask = torch.FloatTensor(o1_mask)
+            o2_mask = torch.FloatTensor(o2_mask)
 
             # Policy Gradient Loss
-            policy_obj_loss = torch.FloatTensor([0]).cuda()
+            policy_obj_loss = torch.FloatTensor([0])
             cnt = 0
             for i in range(self.batch_size):
                 if dec_steps[i] >= 1:

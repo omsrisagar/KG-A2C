@@ -54,7 +54,8 @@ class KGA2CEnv:
     def create(self):
         ''' Create the Jericho environment and connect to redis. '''
         self.env = jericho.FrotzEnv(self.rom_path, self.seed)
-        self.bindings = jericho.load_bindings(self.rom_path)
+        # self.bindings = jericho._load_bindings(self.rom_path)
+        self.bindings = self.env.bindings
         self.act_gen = TemplateActionGenerator(self.bindings)
         self.max_word_len = self.bindings['max_word_length']
         self.vocab, self.vocab_rev = load_vocab(self.env)
@@ -82,7 +83,7 @@ class KGA2CEnv:
 
     def _build_graph_rep(self, action, ob_r):
         ''' Returns various graph-based representations of the current state. '''
-        objs = [o[0] for o in self.env.identify_interactive_objects(ob_r)]
+        objs = [o[0] for o in self.env._identify_interactive_objects(ob_r)]
         objs.append('all')
         admissible_actions = self._get_admissible_actions(objs)
         admissible_actions_rep = [self.state_rep.get_action_rep_drqa(a.action) \

@@ -6,6 +6,7 @@ from multiprocessing import Process, Pipe
 def start_redis():
     print('Starting Redis')
     subprocess.Popen(['redis-server', '--save', '\"\"', '--appendonly', 'no'])
+    # subprocess.Popen(['brew', 'services', 'start', 'redis', '--save', '\"\"', '--appendonly', 'no'])
     time.sleep(1)
 
 
