@@ -11,3 +11,5 @@ channels:
     - tensorflow
     - torch
     - torchvision
+    - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz
+    - git+git://github.com/microsoft/jericho.git@6f761073ef064e62412c36cc8de569f57b39561c

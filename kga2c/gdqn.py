@@ -47,8 +47,8 @@ class KGA2CTrainer(object):
         log('Parameters {}'.format(params))
         self.params = params
         env = FrotzEnv(params['rom_file_path'])
-        # self.binding = jericho._load_bindings(params['rom_file_path']) # load_bindings no longer works
-        self.binding = env.bindings
+        self.binding = load_bindings(params['rom_file_path']) # load_bindings no longer works
+        # self.binding = env.bindings
         self.max_word_length = self.binding['max_word_length']
         self.sp = spm.SentencePieceProcessor()
         self.sp.Load(params['spm_file'])

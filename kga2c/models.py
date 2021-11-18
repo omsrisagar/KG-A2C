@@ -51,18 +51,22 @@ class ObjectDecoder(nn.Module):
 
                 dec_objs = []
                 for i in range(decoder_output.shape[0]):
-                    dec_probs = F.softmax(ret_decoder_output[i][graphs[i]], dim=0)
+                    # dec_probs = F.softmax(ret_decoder_output[i][graphs[i]], dim=0)
+                    dec_probs = F.softmax(ret_decoder_output[i], dim=0)
                     idx = dec_probs.multinomial(1)
-                    graph_list = graphs[i].nonzero().cpu().numpy().flatten().tolist()
-                    assert len(graph_list) == dec_probs.numel()
-                    dec_objs.append(graph_list[idx])
+                    # graph_list = graphs[i].nonzero().cpu().numpy().flatten().tolist()
+                    # assert len(graph_list) == dec_probs.numel()
+                    # dec_objs.append(graph_list[idx])
+                    # idx = torch.randint(len(graphs[i]), (1,))
+                    dec_objs.append([idx])
                 topi = torch.LongTensor(dec_objs)
 
                 # dec_probs = self.softmax(decoder_output)
                 # topi = dec_probs.multinomial(num_samples=1)
                 # topi = self.softmax(decoder_output).topk(1)[1]
 
-                decoder_input = topi.squeeze().detach()
+                # decoder_input = topi.squeeze().detach()
+                decoder_input = topi.squeeze(0).detach()
 
                 all_words.append(topi)
             else:
@@ -319,10 +323,10 @@ class ActionDrQA(nn.Module):
         :type obs: np.ndarray of shape (Batch_Size x 4 x 300)
 
         '''
-        x_l, h_l = self.enc_look(torch.LongTensor(obs[:,0,:]), self.h_look)
-        x_i, h_i = self.enc_inv(torch.LongTensor(obs[:,1,:]), self.h_inv)
-        x_o, h_o = self.enc_ob(torch.LongTensor(obs[:,2,:]), self.h_ob)
-        x_p, h_p = self.enc_preva(torch.LongTensor(obs[:,3,:]), self.h_preva)
+        x_l, h_l = self.enc_look(torch.LongTensor(obs[:,0,:]), self.h_look) # room description
+        x_i, h_i = self.enc_inv(torch.LongTensor(obs[:,1,:]), self.h_inv) # inventory
+        x_o, h_o = self.enc_ob(torch.LongTensor(obs[:,2,:]), self.h_ob) # game feedback
+        x_p, h_p = self.enc_preva(torch.LongTensor(obs[:,3,:]), self.h_preva) # previous action
 
         if self.recurrent:
             self.h_look = h_l

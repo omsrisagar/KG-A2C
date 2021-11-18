@@ -49,8 +49,8 @@ def worker(remote, parent_remote, env):
 
 class VecEnv:
     def __init__(self, num_envs, env, openie_path):
-        start_redis()
-        start_openie(openie_path)
+        start_redis() # enable redis server and listen on 6379
+        start_openie(openie_path) # enable openie server and listen on 9000
         self.conn_valid = redis.Redis(host='localhost', port=6379, db=0)
         self.closed = False
         self.total_steps = 0
