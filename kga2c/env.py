@@ -103,7 +103,7 @@ class KGA2CEnv:
         openie_cache = self.conn_openie.get(cleaned_obs)
         if openie_cache is None:
             rules, tocache = self.state_rep.step(cleaned_obs, ob_i, objs, action, cache=None, gat=self.gat)
-            self.conn_openie.set(cleaned_obs, str(tocache))
+            self.conn_openie.set(cleaned_obs, str(tocache)) # just like cache, so you don't have to do get again (103)
         else:
             openie_cache = eval(openie_cache.decode('cp1252'))
             rules, _ = self.state_rep.step(cleaned_obs, ob_i, objs, action, cache=openie_cache, gat=self.gat)

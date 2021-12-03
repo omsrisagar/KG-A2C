@@ -14,7 +14,7 @@
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/kga2c/train.py" />
     <option name="PARAMETERS" value="--rom_file_path roms/zork1.z5 --openie_path stanford-corenlp-4.3.1 --tsv_file ../data/zork1_entity2id.tsv --batch_size 1" />
-    <option name="SHOW_COMMAND_LINE" value="false" />
+    <option name="SHOW_COMMAND_LINE" value="true" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
     <option name="REDIRECT_INPUT" value="false" />

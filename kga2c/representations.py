@@ -50,7 +50,7 @@ class StateAction(object):
         prev_room = self.room
 
         graph_copy = self.graph_state.copy()
-        con_cs = [graph_copy.subgraph(c) for c in nx.weakly_connected_components(graph_copy)]
+        con_cs = [graph_copy.subgraph(c) for c in nx.weakly_connected_components(graph_copy)] # connected components
 
         prev_room_subgraph = None
         prev_you_subgraph = None

@@ -163,7 +163,7 @@ class KGA2C(nn.Module):
                 cur_st = [0]
             else:
                 cur_st = [1]
-            cur_st.extend([int(c) for c in '{0:09b}'.format(abs(scr))])
+            cur_st.extend([int(c) for c in '{0:09b}'.format(abs(scr))]) # 10 bit binary repr. of score to array
             src_t.append(cur_st)
 
         src_t = torch.FloatTensor(src_t)
@@ -177,7 +177,7 @@ class KGA2C(nn.Module):
         det_state_emb = state_emb.clone()#.detach()
         value = self.critic(det_state_emb)
 
-        decoder_t_output, decoder_t_hidden = self.decoder_template(state_emb, h_t)#torch.zeros_like(h_t))
+        decoder_t_output, decoder_t_hidden = self.decoder_template(state_emb, h_t)#torch.zeros_like(h_t)) No Attent!
 
         templ_enc_input = []
         decode_steps = []
@@ -258,7 +258,7 @@ class StateNetwork(nn.Module):
     def forward(self, graph_rep):
         out = []
         for g in graph_rep:
-            node_feats, adj = g
+            node_feats, adj = g # node_feats are not used! Instead using a zero initialized 362x50 vector
             adj = torch.IntTensor(adj)
             x = self.gat.forward(self.state_ent_emb.weight, adj).view(-1)
             out.append(x.unsqueeze_(0))
@@ -325,7 +325,7 @@ class ActionDrQA(nn.Module):
         '''
         x_l, h_l = self.enc_look(torch.LongTensor(obs[:,0,:]), self.h_look) # room description
         x_i, h_i = self.enc_inv(torch.LongTensor(obs[:,1,:]), self.h_inv) # inventory
-        x_o, h_o = self.enc_ob(torch.LongTensor(obs[:,2,:]), self.h_ob) # game feedback
+        x_o, h_o = self.enc_ob(torch.LongTensor(obs[:,2,:]), self.h_ob) # game feedback/response
         x_p, h_p = self.enc_preva(torch.LongTensor(obs[:,3,:]), self.h_preva) # previous action
 
         if self.recurrent:
@@ -334,7 +334,7 @@ class ActionDrQA(nn.Module):
             self.h_preva = h_p
             self.h_inv = h_i
 
-        x = F.relu(self.fcx(torch.cat((x_l, x_i, x_o, x_p), dim=1)))
-        h = F.relu(self.fch(torch.cat((h_l, h_i, h_o, h_p), dim=2)))
+        x = F.relu(self.fcx(torch.cat((x_l, x_i, x_o, x_p), dim=1))) # output
+        h = F.relu(self.fch(torch.cat((h_l, h_i, h_o, h_p), dim=2))) # hidden
 
         return x, h
